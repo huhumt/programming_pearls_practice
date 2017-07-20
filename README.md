@@ -1,2 +1,2 @@
 # programming_pearls_practice
-this is my implement of practic in the book of "Programming Pearls"
+this is my implementation for the book of "Programming Pearls"
