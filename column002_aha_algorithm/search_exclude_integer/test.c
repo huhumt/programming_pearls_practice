@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#include "bitmap_sort.h"
+#include "search_exclude_integer.h"
 
 /************************************************************************
  * Description: generate random number ranges from [low_range, hi_range)
@@ -51,68 +51,47 @@ int main(int argc, char *argv[])
 {
     LOG("begin to run........\n");
     char *psrc_name = "./a.txt";
-    char *pdst_name = "./b.txt";
-    FILE *fd_src, *fd_dst;
-    uint32_t i, random_num;
-    static uint32_t random_num_pre = 0;
+    FILE *fd_src;
+    uint32_t i, j, random_num;
+    const uint32_t kMAX_UINT32 = (1 << 31);
+    const uint32_t kRANDOM_NUM_SIZE = 6000000;
+    const uint32_t kSEARCH_ARRAY_SIZE = 10000;
+    uint32_t search_array[kSEARCH_ARRAY_SIZE];
+    uint32_t zero_num_counter = 0;
 
-    LOG("argc = %d\n", argc);
-    switch(argc) {
-    default:
-    case 1:
-        break;
-    case 2:
-        pdst_name = argv[1];
-        break;
-    case 3:
-        psrc_name = argv[1];
-        pdst_name = argv[2];
-        break;
-    }
+    memset(search_array, 0, sizeof(search_array));
 
-    LOG("Begin to generate 10,000,000 random data\n");
+    LOG("Begin to generate %lu random data\n", kRANDOM_NUM_SIZE);
     fd_src = fopen(psrc_name, "wb");
 
-    for (i = 0; i < 100; i += 1) {
-        random_num = generate_random_number(0, MAX_SUPPORT_SIZE);
-        if (i % 10 == 0) {
-            printf("\n");
+    for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {
+        random_num = generate_random_number(0, kMAX_UINT32);
+        if (random_num == 0) { // count how many zeros
+            zero_num_counter += 1;
         }
-        printf("    %07lu", random_num);
-    }
-    printf("\n\n");
-
-    for (i = 0; i < MAX_SUPPORT_SIZE; i += 1) {
-        //random_num = generate_random_number(0, MAX_SUPPORT_SIZE);
-        random_num = 9999999 - i;
         fwrite(&random_num, 4, 1, fd_src);
     }
     fclose(fd_src);
     LOG("Success generate random a.txt file\n");
 
-    bitmap_sort(psrc_name, pdst_name, MAX_SUPPORT_SIZE);
+    search_exclude_uint32(psrc_name, search_array, kSEARCH_ARRAY_SIZE);
 
-    /* check for data in b.txt */
-    fd_dst = fopen(pdst_name, "rb");
-    if (fd_dst != NULL) {
-        LOG("Success open %s\n", pdst_name);
-    } else {
-        LOG("Fail to open %s\n", pdst_name);
-        return -5;
-    }
-
-    for (i = 0; i < MAX_SUPPORT_SIZE; i += 1) {
-        fread(&random_num, 4, 1, fd_dst);
-        /* not the first loop, but current number is smaller than previous, error */
-        if (random_num_pre && random_num_pre >= random_num) {
-            LOG("Sort number failed\n");
-            fclose(fd_dst);
-            return -2;
+    fd_src = fopen(psrc_name, "rb");
+    for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {
+        fread(&random_num, 4, 1, fd_src);
+        for (j = 0; j < kSEARCH_ARRAY_SIZE; j += 1) {
+            if (random_num == search_array[j]) {
+                LOG("Error: find same integer with the file\n");
+                fclose(fd_src);
+                return -2;
+            } else {
+                // everything is ok, have a rest
+            }
         }
-        random_num_pre = random_num;
     }
-    fclose(fd_dst);
-    LOG("Pass test, sort number success\n");
+
+    LOG("Pass the test, congratulations\n");
+    LOG("Totally have %lu 0 in %s\n", zero_num_counter, psrc_name);
 
     return 0;
 }

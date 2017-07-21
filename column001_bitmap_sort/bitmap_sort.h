@@ -16,12 +16,12 @@
 #ifdef _DEBUG_MODE_EN
     #define LOG    printf
 #else
-    #define LOG    //
+    #define LOG
 #endif /* _DEBUG_MODE_EN */
 
 /******************************************************************
  * Description: sort disk data by bitmap
- * Input:
+ * Parameters:
  *     *psrc_name: pointer to input disk file name
  *     *pdst_name: pointer to file name you want to save on disk
  *     num_size: how many valid data stored in psrc_name

@@ -3,6 +3,7 @@
  * Author: huhao
  * Data: 2017.07.18
  * Modification record:
+ *     huhao, 2017.07.21: add some description to the functions
  *
  *********************************************************************************************/
 
@@ -12,10 +13,10 @@
 
 /****************************************************************
  * Description: get status of certain bit of number
- * Input:
+ * Parameters:
  *     num: the number need to be checked
  *     which_bit: which bit need to be checked
- * return: 1-bit enabled, 0-bit disabled
+ * Return: 1-bit enabled, 0-bit disabled
  ****************************************************************/
 static inline uint8_t GET_BIT(uint8_t num, uint8_t which_bit)
 {
@@ -26,6 +27,13 @@ static inline uint8_t GET_BIT(uint8_t num, uint8_t which_bit)
     }
 }
 
+/******************************************************************
+ * Description: set certain bit to enabled
+ * Parameters:
+ *     num: the number need to be set bit
+ *     which_bit: which bit need to be set enabled
+ * Return: the number after setting bit
+ *******************************************************************/
 static inline uint8_t SET_BIT(uint8_t num, uint8_t which_bit)
 {
     if (which_bit < 8) { // only applied to uint8_t type
@@ -35,6 +43,7 @@ static inline uint8_t SET_BIT(uint8_t num, uint8_t which_bit)
     }
 }
 
+/* interface function, refer to .h file to use it */
 int bitmap_sort(char *psrc_name, char *pdst_name, uint32_t num_size)
 {
     uint32_t i, index, tmp;
@@ -63,7 +72,7 @@ int bitmap_sort(char *psrc_name, char *pdst_name, uint32_t num_size)
             LOG("Dupicated data found, error\n");
             fclose(fd_src);
             return -4;
-        } else {
+        } else { // first time to detect the data, record it in bitmap
             bitmap_array[index] = SET_BIT(bitmap_array[index], offset);
         }
     }
@@ -89,7 +98,7 @@ int bitmap_sort(char *psrc_name, char *pdst_name, uint32_t num_size)
         }
     }
     fclose(fd_dst);
-    LOG("Success sort a.txt to b.txt\n");
+    LOG("Success sort %s to %s\n", psrc_name, pdst_name);
 
     return 0;
 }
