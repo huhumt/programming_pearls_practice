@@ -51,21 +51,27 @@ static inline uint8_t SET_BIT(uint8_t num, uint8_t which_bit)
  **************************************************************************************/
 static int generate_alphabet_map(char *psrc, uint8_t alphabet_map[], uint8_t len)
 {
+    char tmp;
     uint8_t index;
 
-    while (*psrc != '\0') {
-        if (*psrc >= 'A' && *psrc <= 'Z') {
+    if (psrc == NULL) {
+        return -5;
+    }
+
+    do { // if empty string, can exit abnormal
+        tmp = *psrc;
+        if (tmp >= 'A' && tmp <= 'Z') {
             /* lowercase all the letters first */
-            *psrc += 32;
-        } else if (*psrc >= 'a' && *psrc <= 'z') {
+            tmp += 32;
+        } else if (tmp >= 'a' && tmp <= 'z') {
             // do nothing
         } else { // not valid letter
             return -5;
         }
-        index = *psrc - 'a';
+        index = tmp - 'a';
         alphabet_map[index] += 1;
         psrc += 1; // move pointer to next
-    }
+    } while (*psrc != '\0');
 
     return 0;
 }
@@ -118,7 +124,7 @@ int search_anagram(char *dict[], uint32_t len)
 
             if (generate_alphabet_map(dict[j], alphabet_map2, MAX_LETTER_NUM) < 0) {
                 /* non-alphabet found, invalid string */
-                break;
+                continue;
             } else {
                 for (k = 0; k < MAX_LETTER_NUM; k += 1) {
                     if (alphabet_map1[k] == alphabet_map2[k]) { // same letter
@@ -146,7 +152,7 @@ int search_anagram(char *dict[], uint32_t len)
             }
         }
     }
-    LOG("\n");
+    LOG("\n\n");
 
     return 0;
 }
