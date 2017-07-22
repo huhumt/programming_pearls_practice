@@ -1,5 +1,5 @@
 /**************************************************************************************
- * This source file is a test file for bitmap sort implement
+ * This source file is a test file for find excluded integer from given file
  * Author: huhao
  * Date: 2017.07.18
  * Modification record:
@@ -7,7 +7,6 @@
  **************************************************************************************/
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <time.h>
 #include "search_exclude_integer.h"

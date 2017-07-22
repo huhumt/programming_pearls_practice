@@ -10,6 +10,7 @@
 #define _SEARCH_EXCLUDE_INTEGER_H_
 
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef _DEBUG_MODE_EN
     #define LOG    printf

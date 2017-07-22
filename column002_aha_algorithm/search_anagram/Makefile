@@ -2,7 +2,7 @@
 
 cc=gcc
 self_macro=-D _DEBUG_MODE_EN
-source_file=test.c rotate_vector.c
+source_file=test.c search_anagram.c
 target=test.exe
 libs=
 cflags=

@@ -10,6 +10,7 @@
 #define _BITMAP_SORT_H_
 
 #include <stdint.h>
+#include <stdio.h>
 
 #define MAX_SUPPORT_SIZE    (10000000)
 
