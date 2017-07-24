@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
     char *psrc_name = "./a.txt";
     FILE *fd_src;
     uint32_t i, j, random_num;
-    const uint32_t kMAX_UINT32 = (1 << 31);
-    const uint32_t kRANDOM_NUM_SIZE = 6000000;
+    const uint32_t kMAX_UINT32 = (1 << 30);
+    const uint32_t kRANDOM_NUM_SIZE = 600000;
     const uint32_t kSEARCH_ARRAY_SIZE = 10000;
     uint32_t search_array[kSEARCH_ARRAY_SIZE];
     uint32_t search_method2;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     fd_src = fopen(psrc_name, "wb");
 
     for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {
-        random_num = generate_random_number(0, kMAX_UINT32);
+        random_num = generate_random_number(0, kMAX_UINT32 * 3);
         if (random_num == 0) { // count how many zeros
             zero_num_counter += 1;
         }
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
     search_exclude_uint32(psrc_name, search_array, kSEARCH_ARRAY_SIZE);
     search_method2 = search_exclude_uint32_method2(psrc_name);
-    LOG("Find %lu using search method2\n");
+    LOG("Find %lu using search method2\n", search_method2);
 
     fd_src = fopen(psrc_name, "rb");
     for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {

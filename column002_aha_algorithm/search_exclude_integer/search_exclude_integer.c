@@ -211,7 +211,7 @@ uint32_t search_exclude_uint32_method2(char *pfile_name)
     FILE *fd_src;
     uint32_t i, tmp, num_size;
     uint32_t left_counter, right_counter;
-    uint32_t midpoint;
+    uint32_t midpoint, search_len;
 
     fd_src = fopen(pfile_name, "rb");
     if (fd_src == NULL) {
@@ -222,11 +222,12 @@ uint32_t search_exclude_uint32_method2(char *pfile_name)
     num_size = ftell(fd_src) / sizeof(uint32_t);
     rewind(fd_src);
 
-    midpoint = ((uint32_t) 1) << 31;
+    midpoint = HALF_MAX_UINT32;
+    search_len = HALF_MAX_UINT32;
     /* read data, compare left part and right part devided by midpoint
      * there must be some data missing in the smaller part
      * if any part has 0 data, it means we find the missing data */
-    do {
+    while (1) {
         /* initial counter and midpoint */
         left_counter = 0;
         right_counter = 0;
@@ -241,23 +242,29 @@ uint32_t search_exclude_uint32_method2(char *pfile_name)
             }
         }
         rewind(fd_src);
+        LOG("Search range, %lu:%lu, left_counter=%lu, right_counter=%lu\n", midpoint - search_len, midpoint, left_counter, right_counter);
 
-        /* there must be some data missing in the part with less data */
-        tmp = midpoint / 2;
-        if (left_counter > right_counter) {
-            midpoint += tmp;
+        /* for we devide data by format of [left_index, midpoint) and [midpoint, right_index)
+         * it means left is included while right is excluded */
+        if (left_counter == 0) {
+            fclose(fd_src);
+            return midpoint - 1;
+        } else if(right_counter == 0) {
+            fclose(fd_src);
+            return midpoint;
         } else {
-            midpoint -= tmp;
+            /* there must be some data missing in the part with less data */
+            search_len >>= 1;
+            if (left_counter > right_counter) {
+                midpoint += search_len;
+            } else {
+                midpoint -= search_len;
+                if (left_counter == HALF_MAX_UINT32) {
+                    fclose(fd_src);
+                    LOG("No missing uint32_t data in the file\n");
+                    return 0;
+                }
+            }
         }
-    } while (left_counter && right_counter);
-
-    fclose(fd_src);
-
-    /* for we devide data by format of [left_index, midpoint) and [midpoint, right_index)
-     * it means left is included while right is excluded */
-    if (left_counter == 0) {
-        return midpoint - 1;
-    } else {
-        return midpoint;
     }
 }

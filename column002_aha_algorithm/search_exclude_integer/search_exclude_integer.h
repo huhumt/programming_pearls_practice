@@ -18,6 +18,8 @@
     #define LOG
 #endif /* _DEBUG_MODE_EN */
 
+#define HALF_MAX_UINT32    (((uint32_t) 1) << 31)
+
 /**************************************************************************************
  * Description: find integers that are not in the file
  * Parameters:
