@@ -145,6 +145,7 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
             bitmap[m][index] = SET_BIT(bitmap[m][index], offset);
         }
     }
+    fclose(fd_src);
 
     for (m = 0; m < 4; m += 1) { // check bitmap
         for (n = 0; n < 32; n += 1) {
@@ -184,7 +185,6 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
                                 counter += 1;
                                 if (counter >= array_size) { // have collected enough data for the array
                                     LOG("Success find %lu excluded data with %lu 0\n", counter, zero_num_counter);
-                                    fclose(fd_src);
                                     return 0;
                                 } else { // still in collecting data
                                     // currently we do nothing here
@@ -197,7 +197,6 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
         }
     }
 
-    fclose(fd_src);
     /* if do not exit before searched all the bitmap, indicate not enough excluded data
      * but we do not treat it as an error, return 0 as normal */
     LOG("Not enough excluded data, only find %lu with %lu 0\n", counter, zero_num_counter);
