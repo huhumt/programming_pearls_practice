@@ -29,4 +29,6 @@
  **************************************************************************************/
 int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_size);
 
+uint32_t search_exclude_uint32_method2(char *pfile_name);
+
 #endif /* _SEARCH_EXCLUDE_INTEGER_H_ */

@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     const uint32_t kRANDOM_NUM_SIZE = 6000000;
     const uint32_t kSEARCH_ARRAY_SIZE = 10000;
     uint32_t search_array[kSEARCH_ARRAY_SIZE];
+    uint32_t search_method2;
     uint32_t zero_num_counter = 0;
 
     memset(search_array, 0, sizeof(search_array));
@@ -74,10 +75,16 @@ int main(int argc, char *argv[])
     LOG("Success generate random a.txt file\n");
 
     search_exclude_uint32(psrc_name, search_array, kSEARCH_ARRAY_SIZE);
+    search_method2 = search_exclude_uint32_method2(psrc_name);
+    LOG("Find %lu using search method2\n");
 
     fd_src = fopen(psrc_name, "rb");
     for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {
         fread(&random_num, 4, 1, fd_src);
+        if (random_num == search_method2) {
+            LOG("Error: find same integer with the file using method2\n");
+            return -2;
+        }
         for (j = 0; j < kSEARCH_ARRAY_SIZE; j += 1) {
             if (random_num == search_array[j]) {
                 LOG("Error: find same integer with the file\n");

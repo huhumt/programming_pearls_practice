@@ -205,3 +205,59 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
 
 #endif /* _SOLUTION_ONE */
 }
+
+uint32_t search_exclude_uint32_method2(char *pfile_name)
+{
+    FILE *fd_src;
+    uint32_t i, tmp, num_size;
+    uint32_t left_counter, right_counter;
+    uint32_t midpoint;
+
+    fd_src = fopen(pfile_name, "rb");
+    if (fd_src == NULL) {
+        LOG("Fail to open file %s\n", pfile_name);
+        return -5;
+    }
+    fseek(fd_src, 0, SEEK_END);
+    num_size = ftell(fd_src) / sizeof(uint32_t);
+    rewind(fd_src);
+
+    midpoint = ((uint32_t) 1) << 31;
+    /* read data, compare left part and right part devided by midpoint
+     * there must be some data missing in the smaller part
+     * if any part has 0 data, it means we find the missing data */
+    do {
+        /* initial counter and midpoint */
+        left_counter = 0;
+        right_counter = 0;
+
+        /* read data from file and counter left/right part */
+        for (i = 0; i < num_size; i += 1) {
+            fread(&tmp, 4, 1, fd_src);
+            if (tmp < midpoint) {
+                left_counter += 1;
+            } else {
+                right_counter += 1;
+            }
+        }
+        rewind(fd_src);
+
+        /* there must be some data missing in the part with less data */
+        tmp = midpoint / 2;
+        if (left_counter > right_counter) {
+            midpoint += tmp;
+        } else {
+            midpoint -= tmp;
+        }
+    } while (left_counter && right_counter);
+
+    fclose(fd_src);
+
+    /* for we devide data by format of [left_index, midpoint) and [midpoint, right_index)
+     * it means left is included while right is excluded */
+    if (left_counter == 0) {
+        return midpoint - 1;
+    } else {
+        return midpoint;
+    }
+}

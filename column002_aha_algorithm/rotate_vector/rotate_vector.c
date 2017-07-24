@@ -16,8 +16,7 @@ int rotate_vector(char *pstr, uint32_t len, uint32_t rotate_point)
     /* the first element index for the left and right */
     uint32_t left_start = 0, right_start = rotate_point;
     /* total element number of left and right */
-    uint32_t left_len = rotate_point;
-    uint32_t right_len = len - left_len;
+    uint32_t left_len = rotate_point, right_len = len - left_len;
 
     /* if rotate_point is at the beginning or end,
      * do not need rotate at all */
@@ -44,8 +43,8 @@ int rotate_vector(char *pstr, uint32_t len, uint32_t rotate_point)
                 *(pstr + left_start + i) = *(pstr + right_start_tmp + i);
                 *(pstr + right_start_tmp + i) = tmp;
             }
-            LOG("str=%s, left_len=%d, right_len = %d, left_start=%d, right_start=%d\n", pstr, left_len, right_len, left_start, right_start);
             right_len -= left_len;
+            LOG("str=%s, left_len=%d, right_len = %d, left_start=%d, right_start=%d\n", pstr, left_len, right_len, left_start, right_start);
         }
     }
 
