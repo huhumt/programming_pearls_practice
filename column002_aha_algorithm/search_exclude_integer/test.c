@@ -51,53 +51,20 @@ int main(int argc, char *argv[])
     LOG("begin to run........\n");
     char *psrc_name = "./a.txt";
     FILE *fd_src;
-    uint32_t i, j, random_num;
-    const uint32_t kMAX_UINT32 = (1 << 30);
-    const uint32_t kRANDOM_NUM_SIZE = 600000;
-    const uint32_t kSEARCH_ARRAY_SIZE = 10000;
-    uint32_t search_array[kSEARCH_ARRAY_SIZE];
-    uint32_t search_method2;
-    uint32_t zero_num_counter = 0;
+    uint32_t i, tmp;
 
-    memset(search_array, 0, sizeof(search_array));
-
-    LOG("Begin to generate %lu random data\n", kRANDOM_NUM_SIZE);
     fd_src = fopen(psrc_name, "wb");
-
-    for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {
-        random_num = generate_random_number(0, kMAX_UINT32 * 3);
-        if (random_num == 0) { // count how many zeros
-            zero_num_counter += 1;
+    for (i = 4000000UL; i >= 1; i -= 1) {
+        if (100 == i) {
+            tmp = 0;
+        } else {
+            tmp = i;
         }
-        fwrite(&random_num, 4, 1, fd_src);
+        fwrite(&tmp, 4, 1, fd_src);
     }
     fclose(fd_src);
-    LOG("Success generate random a.txt file\n");
 
-    search_exclude_uint32(psrc_name, search_array, kSEARCH_ARRAY_SIZE);
-    search_method2 = search_exclude_uint32_method2(psrc_name);
-    LOG("Find %lu using search method2\n", search_method2);
-
-    fd_src = fopen(psrc_name, "rb");
-    for (i = 0; i < kRANDOM_NUM_SIZE; i += 1) {
-        fread(&random_num, 4, 1, fd_src);
-        if (random_num == search_method2) {
-            LOG("Error: find same integer with the file using method2\n");
-            return -2;
-        }
-        for (j = 0; j < kSEARCH_ARRAY_SIZE; j += 1) {
-            if (random_num == search_array[j]) {
-                LOG("Error: find same integer with the file\n");
-                fclose(fd_src);
-                return -2;
-            } else {
-                // everything is ok, have a rest
-            }
-        }
-    }
-
-    LOG("Pass the test, congratulations\n");
-    LOG("Totally have %lu 0 in %s\n", zero_num_counter, psrc_name);
-
+    tmp = search_exclude_uint32_method2(psrc_name);
+    LOG("Pass the test, missing data is %lu, congratulations\n", tmp);
     return 0;
 }

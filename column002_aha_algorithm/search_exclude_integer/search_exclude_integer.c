@@ -10,6 +10,8 @@
 #include <string.h>
 #include "search_exclude_integer.h"
 
+#define HALF_MAX_UINT32    (((uint32_t) 1) << 31)
+
 /****************************************************************
  * Description: get status of certain bit of number
  * Parameters:
@@ -46,8 +48,7 @@ static inline uint8_t SET_BIT(uint8_t num, uint8_t which_bit)
 int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_size)
 {
     FILE *fd_src;
-    uint32_t i, tmp;
-    uint32_t num_size, counter = 0;
+    uint32_t num_size;
 
     fd_src = fopen(pfile_name, "rb");
     if (fd_src != NULL) {
@@ -73,6 +74,7 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
      * all the included and excluded integers, then we can put
      * array_size integers to parray to accomplish the task
      *************************************************************************/
+    uint32_t i, tmp, counter = 0;
     const uint32_t kARRAY_SIZE = 1 << (32 - 3);
     /* It takes too much memory here, I can't even test it on my computer */
     uint8_t bitmap_array[kARRAY_SIZE];
@@ -86,7 +88,7 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
         index = tmp / 8;
         offset = tmp % 8;
         if (GET_BIT(bitmap_array[index], offset)) { // have recored data already
-            LOG("Dupicated data found, error\n");
+            LOG("Duplicated data found, error\n");
             fclose(fd_src);
             return -4;
         } else { // first time to detect the data, record it in bitmap
@@ -103,13 +105,12 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
             } else { // the num is excluded from the file
                 tmp = i * 8 + j;
                 *parray = tmp;
-                parray += 1; // move pointer to the next, I never use "++" or "--"
                 counter += 1; // find one more data excluded from the file
                 if (counter >= array_size) { // have collected enough data for the array
                     LOG("Success find %lu excluded data\n", counter);
                     return 0;
                 } else { // still in collecting data
-                    // currently we do nothing here
+                    parray += 1; // move pointer to the next, I never use "++" or "--"
                 }
             }
         }
@@ -122,85 +123,6 @@ int search_exclude_uint32(char *pfile_name, uint32_t *parray, uint32_t array_siz
 
 #else
 
-    /***********************************************************************************
-     * In this situation, we only have hundred bytes of memory.
-     **********************************************************************************/
-
-    /* Each byte can be [0x00, 0xff], totally 256 possibility
-     * so need 256 bits(32 bytes) for each, uint32_t has 4 byte */
-    uint8_t bitmap[4][32];
-    uint8_t k, m, n, m_data;
-    uint16_t loop1, loop2, loop3;
-    uint8_t index, offset;
-    uint32_t zero_num_counter = 0;
-
-    memset(bitmap, 0, sizeof(bitmap));
-
-    for (i = 0; i < num_size; i += 1) {
-        fread(&tmp, 4, 1, fd_src);
-        for (m = 0; m < 4; m += 1) {
-            m_data = (uint8_t) ((tmp >> (8 * m)) & 0xff);
-            index = m_data / 8;
-            offset = m_data % 8;
-            bitmap[m][index] = SET_BIT(bitmap[m][index], offset);
-        }
-    }
-    fclose(fd_src);
-
-    for (m = 0; m < 4; m += 1) { // check bitmap
-        for (n = 0; n < 32; n += 1) {
-            for (k = 0; k < 8; k += 1) {
-                if (GET_BIT(bitmap[m][n], k)) { // this byte is recorded
-                    // do nothing currently
-                } else { // this byte hasn't been recorded
-                    m_data = 8 * n + k;
-                    for (loop1 = 0; loop1 < 256; loop1 += 1) {
-                        for (loop2 = 0; loop2 < 256; loop2 += 1) {
-                            for (loop3 = 0; loop3 < 256; loop3 += 1) {
-                                switch (m) {
-                                case 0:
-                                    tmp = (((uint32_t) loop1) << 24) + (((uint32_t) loop2) << 16)
-                                        + (((uint32_t) loop3) << 8) + (uint32_t) m_data;
-                                    break;
-                                case 1:
-                                    tmp = (((uint32_t) loop1) << 24) + (((uint32_t) loop2) << 16)
-                                        + ((uint32_t) loop3) + (((uint32_t) m_data) << 8);
-                                    break;
-                                case 2:
-                                    tmp = (((uint32_t) loop1) << 24) + (((uint32_t) loop2) << 8)
-                                        + ((uint32_t) loop3) + (((uint32_t) m_data) << 16);
-                                    break;
-                                case 3:
-                                    tmp = (((uint32_t) loop1) << 16) + (((uint32_t) loop2) << 8)
-                                        + ((uint32_t) loop3) + (((uint32_t) m_data) << 24);
-                                    break;
-                                default:
-                                    break;
-                                }
-                                if (tmp == 0) {
-                                    zero_num_counter += 1;
-                                }
-                                *parray = tmp;
-                                parray += 1;
-                                counter += 1;
-                                if (counter >= array_size) { // have collected enough data for the array
-                                    LOG("Success find %lu excluded data with %lu 0\n", counter, zero_num_counter);
-                                    return 0;
-                                } else { // still in collecting data
-                                    // currently we do nothing here
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /* if do not exit before searched all the bitmap, indicate not enough excluded data
-     * but we do not treat it as an error, return 0 as normal */
-    LOG("Not enough excluded data, only find %lu with %lu 0\n", counter, zero_num_counter);
-    return 0;
 
 #endif /* _SOLUTION_ONE */
 }
@@ -220,6 +142,7 @@ uint32_t search_exclude_uint32_method2(char *pfile_name)
     fseek(fd_src, 0, SEEK_END);
     num_size = ftell(fd_src) / sizeof(uint32_t);
     rewind(fd_src);
+    LOG("Totally has %lu data\n", num_size);
 
     midpoint = HALF_MAX_UINT32;
     search_len = HALF_MAX_UINT32;
@@ -238,6 +161,12 @@ uint32_t search_exclude_uint32_method2(char *pfile_name)
                 left_counter += 1;
             } else {
                 right_counter += 1;
+            }
+
+            if (left_counter > HALF_MAX_UINT32 || right_counter > HALF_MAX_UINT32) {
+                LOG("Too much duplicated data, exit\n");
+                fclose(fd_src);
+                return -5;
             }
         }
         rewind(fd_src);
@@ -258,7 +187,8 @@ uint32_t search_exclude_uint32_method2(char *pfile_name)
                 midpoint += search_len;
             } else {
                 midpoint -= search_len;
-                if (left_counter == HALF_MAX_UINT32) {
+                /* search for all data and no data missing */
+                if (left_counter == 1 && right_counter == 1) {
                     fclose(fd_src);
                     LOG("No missing uint32_t data in the file\n");
                     return 0;

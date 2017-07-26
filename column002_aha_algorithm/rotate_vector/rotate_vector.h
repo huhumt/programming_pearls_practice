@@ -27,5 +27,6 @@
  * Return: 0 if normal, -n if abnormal
  ********************************************************************/
 int rotate_vector(char *pstr, uint32_t len, uint32_t rotate_point);
+int rotate_vector_method2(char *pstr, uint32_t len, uint32_t rotate_point);
 
 #endif /* _ROTATE_VECTOR_H_ */
