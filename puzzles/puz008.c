@@ -56,7 +56,7 @@ static void compare_string(char* str1, char* str2)
 int main(int argc, char* argv[])
 {
     char* str1 = "abcbdcfedcba";
-    char* str2 = "skjflaksjf;alkjf;ajfdlkaj";
+    char* str2 = "b\\*dcb";
 
     compare_string(str1, str2);
 

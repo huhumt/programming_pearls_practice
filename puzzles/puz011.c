@@ -44,22 +44,23 @@ struct single_list_t* creat_list(uint8_t len)
     return root_node;
 }
 
-void delete_list(struct single_list_t* root_node, uint8_t len)
+void delete_list(struct single_list_t* root_node)
 {
     uint8_t i;
     struct single_list_t *cur_node, *next_node;
 
     cur_node = root_node;
-    for (i = 0; i < len; i += 1) {
+    while (cur_node->pnext != NULL) {
         next_node = cur_node->pnext;
         cur_node->pnext = NULL;
         free(cur_node);
         cur_node = next_node;
     }
+    free(cur_node);
 }
 
 /* sort list by element in ascending/descending order */
-void sort_list(struct single_list_t* root_node, uint8_t len, uint8_t order)
+void sort_list(struct single_list_t* root_node, uint8_t order)
 {
     uint8_t flag;
     struct single_list_t *cur_node, *next_node;
@@ -97,7 +98,7 @@ void sort_list(struct single_list_t* root_node, uint8_t len, uint8_t order)
 
 void reverse_list(struct single_list_t* root_node, uint8_t len)
 {
-    uint8_t i, j, tmp;
+    uint8_t i, j;
     struct single_list_t *cur_node, *next_node;
 
     for (i = 0; i < len - 1; i += 1) {
@@ -275,12 +276,12 @@ int main(int argc, char* argv[])
     delete_node(&root_node, &len, 24);
     delete_node(&root_node, &len, len - 1);
 
-    sort_list(root_node, len, 1);
+    sort_list(root_node, 1);
     reverse_list(root_node, len);
 
     print_list(root_node);
 
-    delete_list(root_node, len);
+    delete_list(root_node);
     root_node = NULL;
 
     return 0;
