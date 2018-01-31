@@ -21,35 +21,15 @@ typedef enum {
 
 binary_tree_t* add_node(binary_tree_t* tree, uint8_t val)
 {
-    binary_tree_t* cur_node;
-
-    cur_node = (binary_tree_t*)calloc(1, sizeof(binary_tree_t));
-
     if (tree == NULL) { // add a new tree
-        cur_node->val = val;
-        cur_node->pleft = NULL;
-        cur_node->pright = NULL;
-        return cur_node;
-    }
-
-    if (val < tree->val) {
-        if (tree->pleft == NULL) {
-            tree->pleft = cur_node;
-            tree->pleft->val = val;
-            tree->pleft->pleft = NULL;
-            tree->pleft->pright = NULL;
-        } else {
-            add_node(tree->pleft, val);
-        }
+        tree = (binary_tree_t*)calloc(1, sizeof(binary_tree_t));
+        tree->val = val;
+        tree->pleft = NULL;
+        tree->pright = NULL;
+    } else if (val < tree->val) {
+        tree->pleft = add_node(tree->pleft, val);
     } else {
-        if (tree->pright == NULL) {
-            tree->pright = cur_node;
-            tree->pright->val = val;
-            tree->pright->pleft = NULL;
-            tree->pright->pright = NULL;
-        } else {
-            add_node(tree->pright, val);
-        }
+        tree->pright = add_node(tree->pright, val);
     }
 
     return tree;
@@ -131,6 +111,9 @@ int main(int argc, char* argv[])
         //  root_node = add_node(root_node, 2 * i + 128);
         root_node = add_node(root_node, array[i]);
     }
+    print_tree(root_node, ORDER_PRE);
+    printf("max level=%d\n", get_tree_level(root_node));
+    add_node(root_node, 18);
     print_tree(root_node, ORDER_PRE);
     printf("max level=%d\n", get_tree_level(root_node));
     tmp_node = search_node(root_node, target);
